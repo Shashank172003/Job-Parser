@@ -1,0 +1,55 @@
+﻿@page "/register"
+@inject NavigationManager Nav
+
+<PageTitle>Register - TechYugaAI</PageTitle>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">TechYuga<span>AI</span></div>
+        <h2 class="auth-title">Create Account</h2>
+        <p class="auth-subtitle">Join TechYugaAI today</p>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="auth-error">@errorMessage</div>
+        }
+
+        <form method="post" action="/account/register" class="auth-form">
+            <AntiforgeryToken />
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="fullName" placeholder="John Doe"
+                       autocomplete="off" class="form-input" />
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="you@example.com"
+                       autocomplete="off" class="form-input" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••"
+                       autocomplete="new-password" class="form-input" />
+            </div>
+            <button type="submit" class="auth-btn">Create Account</button>
+        </form>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <button type="button" class="auth-btn-google"
+                onclick="window.location.href='/google-login'">
+            <img src="https://www.google.com/favicon.ico" width="18" height="18" />
+            Continue with Google
+        </button>
+
+        <p class="auth-switch">
+            Already have an account? <a href="/login">Sign in</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private string? error { get; set; }
+    private string errorMessage => error ?? "";
+}

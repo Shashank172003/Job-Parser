@@ -1,0 +1,66 @@
+﻿@using System.Text.RegularExpressions
+
+@if (Jobs.Any())
+{
+    <div class="job-cards-container">
+        <h4 class="job-cards-title">🔍 Found @Jobs.Count job(s)</h4>
+        @foreach (var job in Jobs)
+        {
+            <div class="job-card">
+                <div class="job-card-header">
+                    <div class="job-card-title">💼 @job.Title</div>
+                    <span class="job-card-type">@job.EmploymentType</span>
+                </div>
+                <div class="job-card-meta">
+                    <span>🏢 @job.Company</span>
+                    <span>📍 @job.Location</span>
+                    <span>💰 @job.Salary</span>
+                </div>
+                <p class="job-card-desc">@job.Description</p>
+                <a href="@job.ApplyLink" target="_blank" class="job-card-btn">
+                    Apply Now →
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public List<JobCardModel> Jobs { get; set; } = new();
+
+    public class JobCardModel
+    {
+        public string Title { get; set; } = "";
+        public string Company { get; set; } = "";
+        public string Location { get; set; } = "";
+        public string EmploymentType { get; set; } = "";
+        public string Salary { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string ApplyLink { get; set; } = "";
+    }
+
+    public static List<JobCardModel> ParseJobCards(string raw)
+    {
+        var jobs = new List<JobCardModel>();
+        var blocks = raw.Split("---", StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var block in blocks)
+        {
+            var lines = block.Trim().Split('\n');
+            var job = new JobCardModel();
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("TITLE:")) job.Title = line[6..].Trim();
+                else if (line.StartsWith("COMPANY:")) job.Company = line[8..].Trim();
+                else if (line.StartsWith("LOCATION:")) job.Location = line[9..].Trim();
+                else if (line.StartsWith("TYPE:")) job.EmploymentType = line[5..].Trim();
+                else if (line.StartsWith("SALARY:")) job.Salary = line[7..].Trim();
+                else if (line.StartsWith("DESC:")) job.Description = line[5..].Trim();
+                else if (line.StartsWith("LINK:")) job.ApplyLink = line[5..].Trim();
+            }
+            if (!string.IsNullOrEmpty(job.Title))
+                jobs.Add(job);
+        }
+        return jobs;
+    }
+}

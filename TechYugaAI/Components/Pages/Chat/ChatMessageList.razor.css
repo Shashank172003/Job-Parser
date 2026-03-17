@@ -1,22 +1,26 @@
-﻿.message-list-container {
+﻿/* ── MESSAGE LIST CONTAINER ── */
+.message-list-container {
     margin: 2rem 1.5rem;
     flex-grow: 1;
 }
 
+/* ── MESSAGE LIST ── */
 .message-list {
-    display: flex; 
-    flex-direction: column; 
-    gap: 1.25rem; 
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 }
 
+/* ── EMPTY STATE ── */
 .no-messages {
     text-align: center;
-    font-size: 1.25rem;
-    color: #999;
+    font-size: 1.1rem;
+    color: #475569;
     margin-top: calc(40vh - 18rem);
+    font-family: 'Outfit', sans-serif;
 }
 
+/* ── BOTTOM BUFFER so suggestions don't overlap last message ── */
 chat-messages > ::deep div:last-of-type {
-    /* Adds some vertical buffer to so that suggestions don't overlap the output when they appear */
     margin-bottom: 2rem;
 }

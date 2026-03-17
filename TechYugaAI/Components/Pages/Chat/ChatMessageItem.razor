@@ -1,6 +1,7 @@
 @using System.Runtime.CompilerServices
 @using System.Text.RegularExpressions
 @using System.Linq
+@using TechYugaAI.Components.Pages.Chat
 
 @if (Message.Role == ChatRole.User)
 {
@@ -24,7 +25,15 @@ else if (Message.Role == ChatRole.Assistant)
                 </div>
                 <div class="assistant-message-header">Assistant</div>
                 <div class="assistant-message-text">
-                    <assistant-message markdown="@text"></assistant-message>
+                    @if (text.Contains("```jobcards"))
+                    {
+                        var jobList = JobCards.ParseJobCards(text);
+                        <JobCards Jobs="@jobList" />
+                    }
+                    else
+                    {
+                        <assistant-message markdown="@text"></assistant-message>
+                    }
 
                     @foreach (var citation in citations ?? [])
                     {

@@ -1,0 +1,58 @@
+﻿@using TechYugaAI.Models
+
+@if (IsOpen)
+{
+    <div @onclick="OnClose" style="position:fixed;inset:0;background:rgba(15,23,42,0.3);z-index:9998;backdrop-filter:blur(2px);"></div>
+}
+
+<div style="position:fixed;top:0;left:@(IsOpen ? "0" : "-300px");width:280px;height:100vh;background:#ffffff;border-right:1px solid #e2e8f0;box-shadow:4px 0 24px rgba(0,0,0,0.08);z-index:9999;transition:left 0.3s ease;display:flex;flex-direction:column;padding:20px 16px;gap:14px;overflow:hidden;">
+
+
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:Outfit,sans-serif;font-weight:800;font-size:1.1rem;color:#0f172a;">
+            TechYuga<span style="color:#6366f1;">AI</span>
+        </span>
+        <button @onclick="OnClose" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;padding:4px 8px;border-radius:6px;transition:all 0.2s;">✕</button>
+    </div>
+
+
+    <button @onclick="OnNewChat" style="background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;border:none;border-radius:10px;padding:11px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;transition:opacity 0.2s;">
+        + New Chat
+    </button>
+
+
+    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;">
+        @if (!Sessions.Any())
+        {
+            <p style="color:#94a3b8;font-size:0.85rem;text-align:center;margin-top:24px;font-family:Outfit,sans-serif;">No chat history yet.</p>
+        }
+        else
+        {
+            @foreach (var session in Sessions)
+            {
+                <div @onclick="() => OnSessionSelected.InvokeAsync(session.Id)"
+                     style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;background:@(SelectedSessionId == session.Id ? "#eef2ff" : "transparent");border:1px solid @(SelectedSessionId == session.Id ? "#6366f1" : "transparent");transition:all 0.2s;">
+                    <div style="flex:1;overflow:hidden;">
+                        <div style="font-size:0.83rem;font-weight:500;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:Outfit,sans-serif;">@session.Title</div>
+                        <div style="font-size:0.72rem;color:#94a3b8;font-family:Outfit,sans-serif;">@session.Mode • @session.CreatedAt.ToString("MMM dd")</div>
+                    </div>
+                    <button @onclick:stopPropagation="true"
+                            @onclick="() => OnSessionDeleted.InvokeAsync(session.Id)"
+                            style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:0.82rem;padding:2px 6px;border-radius:4px;opacity:0.7;">
+                        🗑
+                    </button>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public List<ChatSession> Sessions { get; set; } = new();
+    [Parameter] public int SelectedSessionId { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnNewChat { get; set; }
+    [Parameter] public EventCallback<int> OnSessionSelected { get; set; }
+    [Parameter] public EventCallback<int> OnSessionDeleted { get; set; }
+}

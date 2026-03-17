@@ -1,80 +1,102 @@
-﻿.user-message {
-    background: rgb(182 215 232);
+﻿/* ── USER MESSAGE ── */
+.user-message {
+    background: linear-gradient(135deg, #6366f1, #4338ca);
     align-self: flex-end;
     min-width: 25%;
     max-width: calc(100% - 5rem);
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.25rem; 
-    color: #1F2937; 
-    white-space: pre-wrap; 
+    padding: 0.6rem 1.25rem;
+    border-radius: 16px 16px 4px 16px;
+    color: #ffffff;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.2);
+    font-size: 0.9rem;
+    line-height: 1.6;
 }
 
-.assistant-message, .assistant-search {
+/* ── ASSISTANT MESSAGE ── */
+.assistant-message,
+.assistant-search {
     display: grid;
     grid-template-rows: min-content;
     grid-template-columns: 2rem minmax(0, 1fr);
-    gap: 0.25rem; 
+    gap: 0.25rem;
 }
 
 .assistant-message-header {
     font-weight: 600;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    letter-spacing: 0.3px;
 }
 
 .assistant-message-text {
     grid-column-start: 2;
+    color: #1e293b;
+    font-size: 0.9rem;
+    line-height: 1.65;
 }
 
+/* ── ASSISTANT ICON ── */
 .assistant-message-icon {
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    border-radius: 9999px; 
-    width: 1.5rem; 
-    height: 1.5rem; 
-    color: #ffffff; 
-    background: #9b72ce;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 9999px;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+    flex-shrink: 0;
 }
 
     .assistant-message-icon svg {
-        width: 1rem; 
-        height: 1rem; 
+        width: 1rem;
+        height: 1rem;
     }
 
+/* ── SEARCH ROW ── */
 .assistant-search {
     font-size: 0.875rem;
-    line-height: 1.25rem; 
+    line-height: 1.25rem;
+    color: #64748b;
 }
 
 .assistant-search-icon {
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    width: 1.5rem; 
-    height: 1.5rem; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #6366f1;
 }
 
     .assistant-search-icon svg {
-        width: 1rem; 
-        height: 1rem; 
+        width: 1rem;
+        height: 1rem;
     }
 
 .assistant-search-content {
     align-content: center;
+    color: #64748b;
 }
 
 .assistant-search-phrase {
     font-weight: 600;
+    color: #6366f1;
 }
 
-/* Default styling for markdown-formatted assistant messages */
+/* ── MARKDOWN ── */
 ::deep ul {
     list-style-type: disc;
     margin-left: 1.5rem;
+    color: #1e293b;
 }
 
 ::deep ol {
     list-style-type: decimal;
     margin-left: 1.5rem;
+    color: #1e293b;
 }
 
 ::deep li {
@@ -83,11 +105,14 @@
 
 ::deep strong {
     font-weight: 600;
+    color: #0f172a;
 }
 
 ::deep h3 {
     margin: 1rem 0;
-    font-weight: 600;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 1rem;
 }
 
 ::deep p + p {
@@ -96,25 +121,51 @@
 
 ::deep table {
     margin: 1rem 0;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 ::deep th {
     text-align: left;
-    border-bottom: 1px solid silver;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.3px;
 }
 
 ::deep th, ::deep td {
-    padding: 0.1rem 0.5rem;
+    padding: 0.4rem 0.75rem;
 }
 
 ::deep th, ::deep tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: #f8fafc;
 }
 
+::deep tr:hover {
+    background-color: #eef2ff;
+}
+
+/* ── CODE BLOCKS ── */
 ::deep pre > code {
-    background-color: white;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
     display: block;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     margin: 1rem 0;
     overflow-x: auto;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: #4338ca;
+    line-height: 1.6;
+}
+
+::deep code:not(pre > code) {
+    background-color: #eef2ff;
+    color: #4338ca;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
 }

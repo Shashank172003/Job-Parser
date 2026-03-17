@@ -1,0 +1,170 @@
+﻿/* ── OVERLAY ── */
+.ty-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15,23,42,0.3) !important;
+    z-index: 9998 !important;
+    backdrop-filter: blur(2px);
+}
+
+/* ── SIDEBAR ── */
+.ty-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: -300px !important;
+    width: 280px !important;
+    height: 100vh !important;
+    background: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.08) !important;
+    z-index: 9999 !important;
+    transition: left 0.3s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 16px !important;
+    gap: 14px !important;
+    overflow: hidden !important;
+}
+
+.ty-sidebar-open {
+    left: 0 !important;
+}
+
+/* ── HEADER ── */
+.ty-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.ty-sidebar-x {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+    .ty-sidebar-x:hover {
+        color: #0f172a;
+        background: #f1f5f9;
+    }
+
+/* ── NEW CHAT BUTTON ── */
+.ty-new-chat-btn {
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    text-align: center;
+    transition: opacity 0.2s, transform 0.2s;
+    width: 100%;
+}
+
+    .ty-new-chat-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+/* ── SESSION LIST ── */
+.ty-sidebar-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+}
+
+.ty-no-history {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 24px;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* ── SESSION ITEM ── */
+.ty-session {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+    .ty-session:hover {
+        background: #f1f5f9;
+        border-color: #e2e8f0;
+    }
+
+.ty-session-active {
+    background: #eef2ff !important;
+    border-color: #6366f1 !important;
+}
+
+.ty-session-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.ty-session-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.ty-session-name {
+    font-size: 0.83rem;
+    font-weight: 500;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Outfit', sans-serif;
+}
+
+.ty-session-date {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* ── DELETE BUTTON ── */
+.ty-session-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    font-size: 0.82rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+    color: #94a3b8;
+}
+
+.ty-session:hover .ty-session-del {
+    opacity: 1;
+}
+
+.ty-session-del:hover {
+    background: rgba(220,38,38,0.1);
+    color: #dc2626;
+}

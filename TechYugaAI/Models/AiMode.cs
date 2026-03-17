@@ -5,6 +5,7 @@
         General,
         CVCreator,
         BidMaker,
-        ProjectProposal
+        ProjectProposal,
+        JobParser
     }
 }

@@ -1,23 +1,65 @@
 ﻿@page "/"
+@* @attribute [Authorize] *@
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using System.ComponentModel
 @using TechYugaAI.Models
 @using TechYugaAI.Services
+@using Microsoft.Extensions.AI
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<AppUser> UserManager
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
 @inject SemanticSearch Search
+@inject FileParserService FileParser
+@inject JobSearchService JobSearch
+@inject ChatHistoryService ChatHistory
+@inject AuthenticationStateProvider AuthStateProvider
 @implements IDisposable
 
 <PageTitle>TechYugaAI - @currentMode.ToString()</PageTitle>
 
 @* --- COMMON UI TOOLBAR --- *@
-<div class="techyuga-nav d-flex gap-2 p-3 bg-light border-bottom">
-    <button class="btn @(currentMode == TechYugaMode.General ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.General)">General Chat</button>
-    <button class="btn @(currentMode == TechYugaMode.CVCreator ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.CVCreator)">CV Creator</button>
-    <button class="btn @(currentMode == TechYugaMode.BidMaker ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.BidMaker)">Bid Maker</button>
-    <button class="btn @(currentMode == TechYugaMode.ProjectProposal ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.ProjectProposal)">Proposals</button>
+<div class="techyuga-nav">
+    <button class="btn btn-hamburger"
+            @onclick="@(() => sidebarOpen = !sidebarOpen)">
+        ☰
+    </button>
+
+    <span class="ty-brand">TechYuga<span>AI</span></span>
+
+    <button class="btn @(currentMode == TechYugaMode.General ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.General)">💬 General</button>
+    @* <button class="btn @(currentMode == TechYugaMode.CVCreator ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.CVCreator)">📄 CV Creator</button>
+    <button class="btn @(currentMode == TechYugaMode.BidMaker ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.BidMaker)">💰 Bid Maker</button>
+    <button class="btn @(currentMode == TechYugaMode.ProjectProposal ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.ProjectProposal)">📐 Proposals</button> *@
+    <button class="btn @(currentMode == TechYugaMode.JobParser ? "btn-primary" : "btn-outline-primary")" @onclick="() => SwitchMode(TechYugaMode.JobParser)">🔍 Job Parser</button>
+
+    <div class="ty-user-info ms-auto" style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+        @if (IsAuthenticated)
+        {
+            <span style="color:#94a3b8;font-size:0.85rem;">👤 @currentUserName</span>
+            <a href="/account/logout"
+               class="btn btn-outline-danger"
+               onclick="window.location.href='/account/logout'; return false;">
+                🚪 Logout
+            </a>
+        }
+        else
+        {
+            <button class="btn btn-primary" @onclick="@(() => { showLoginModal = true; modalTab = "login"; })">
+                🔐 Login
+            </button>
+        }
+    </div>
 </div>
 
-<ChatHeader OnNewChat="@ResetConversationAsync" />
+<ChatHistorySidebar IsOpen="@sidebarOpen"
+                    Sessions="@chatSessions"
+                    SelectedSessionId="@currentSessionId"
+                    OnClose="@(() => sidebarOpen = false)"
+                    OnNewChat="@HandleNewChat"
+                    OnSessionSelected="@LoadSessionAsync"
+                    OnSessionDeleted="@DeleteSessionAsync" />
 
 <ChatMessageList Messages="@messages" InProgressMessage="@currentResponseMessage">
     <NoMessagesContent>
@@ -31,20 +73,110 @@
 
 <div class="chat-container">
     <ChatSuggestions OnSelected="@AddUserMessageAsync" @ref="@chatSuggestions" />
+
+    @if (currentMode == TechYugaMode.JobParser)
+    {
+        <div class="upload-row">
+            <label class="btn btn-outline-secondary btn-sm">
+                📎 Upload JD (PDF)
+                <InputFile OnChange="@HandlePdfUpload"
+                           accept=".pdf"
+                           style="display:none" />
+            </label>
+
+            <button class="btn btn-outline-primary btn-sm"
+                    @onclick="ToggleJobSearch">
+                @(showJobSearch ? "📝 Parse JD" : "🔎 Search Jobs")
+            </button>
+
+            @if (!string.IsNullOrEmpty(uploadStatus))
+            {
+                <small class="text-muted">@uploadStatus</small>
+            }
+        </div>
+    }
+
     <ChatInput OnSend="@AddUserMessageAsync" @ref="@chatInput" />
+    @if (showLoginModal)
+    {
+        <div style="position:fixed;inset:0;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;">
+            <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:32px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,0.15);" @onclick:stopPropagation="true">
+
+                <div style="text-align:center;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <h3 style="color:#0f172a;font-family:Outfit,sans-serif;font-weight:700;margin:0;">🔐 Login Required</h3>
+                        <button @onclick="CloseModal" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:1.2rem;padding:0 4px;">✕</button>
+                    </div>
+                    <p style="color:#64748b;font-size:0.88rem;margin-top:8px;">Login to use Job Parser and save your chat history</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(modalError))
+                {
+                    <div style="background:rgba(239,68,68,0.1);border:1px solid #ef4444;border-radius:8px;padding:10px;color:#ef4444;font-size:0.85rem;text-align:center;">
+                        @modalError
+                    </div>
+                }
+
+                @if (modalTab == "login")
+                {
+                    <form method="post" action="/account/login" style="display:flex;flex-direction:column;gap:14px;">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="color:#94a3b8;font-size:0.82rem;">Email</label>
+                            <input type="email" name="email" placeholder="you@example.com"
+                                   style="background:#0e1117;border:1px solid #2a3148;border-radius:8px;padding:10px 14px;color:#e2e8f0;font-size:0.9rem;outline:none;" />
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="color:#94a3b8;font-size:0.82rem;">Password</label>
+                            <input type="password" name="password" placeholder="••••••••"
+                                   style="background:#0e1117;border:1px solid #2a3148;border-radius:8px;padding:10px 14px;color:#e2e8f0;font-size:0.9rem;outline:none;" />
+                        </div>
+                        <button type="submit" style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:8px;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <div style="text-align:center;">
+                        <form method="get" action="/google-login" data-enhance="false">
+                            <button type="submit" style="background:#fff;color:#333;border:1px solid #ddd;border-radius:8px;padding:10px 20px;font-size:0.88rem;font-weight:500;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
+                                <img src="https://www.google.com/favicon.ico" width="16" height="16" />
+                                Continue with Google
+                            </button>
+                        </form>
+                    </div>
+
+                    <p style="text-align:center;color:#64748b;font-size:0.83rem;margin:0;">
+                        Don't have an account?
+                        <span style="color:#3b82f6;cursor:pointer;" @onclick="@(() => modalTab = "register")">Register</span>
+                    </p>
+                }
+                else
+                {
+                    <div style="text-align:center;padding:20px 0;">
+                        <p style="color:#94a3b8;font-size:0.9rem;margin-bottom:20px;">
+                            Create a new account to get started
+                        </p>
+                        <a href="/register"
+                           style="display:block;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:8px;padding:12px;font-size:0.9rem;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;text-decoration:none;text-align:center;">
+                            Go to Register Page
+                        </a>
+                    </div>
+
+                    <p style="text-align:center;color:#64748b;font-size:0.83rem;margin:0;">
+                        Already have an account?
+                        <span style="color:#3b82f6;cursor:pointer;" @onclick="@(() => modalTab = "login")">Sign In</span>
+                    </p>
+                }
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private TechYugaMode currentMode = TechYugaMode.General;
-
-    private string GetSystemPrompt() => currentMode switch
-    {
-        TechYugaMode.CVCreator => "You are the TechYuga CV Agent. Guide the user to provide work history, education, and skills. Use GenerateCVDoc when they are finished.",
-        TechYugaMode.BidMaker => "You are the TechYuga Bid Specialist. Help users estimate costs. Use CalculateBid for any pricing logic.",
-        TechYugaMode.ProjectProposal => "You are the TechYuga Proposal Architect. Draft formal project scopes and timelines.",
-        _ => "You are TechYugaAI, a professional assistant using RAG to answer questions."
-    };
-
+    private bool showJobSearch = false;
+    private string uploadStatus = "";
     private int statefulMessageCount;
     private readonly ChatOptions chatOptions = new();
     private readonly List<ChatMessage> messages = new();
@@ -52,12 +184,60 @@
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
-    private TechYugaAgentTools agentTools = new();
+    private TechYugaAgentTools agentTools = null!;
+    private int currentSessionId = 0;
+    private string currentUserId = "";
+    private string currentUserName = "";
+    private bool sidebarOpen = false;
+    private List<ChatSession> chatSessions = new();
+    private bool showLoginModal = false;
+    private string modalTab = "login";
+    private string modalError = "";
 
-    protected override void OnInitialized()
+    private void CloseModal() => showLoginModal = false;
+
+    private bool IsAuthenticated => !string.IsNullOrEmpty(currentUserId);
+
+    private string GetSystemPrompt() => currentMode switch
     {
+        TechYugaMode.CVCreator => "You are the TechYuga CV Agent. Guide the user to provide work history, education, and skills. Use GenerateCVDoc when they are finished.",
+        TechYugaMode.BidMaker => "You are the TechYuga Bid Specialist. Help users estimate costs. Use CalculateBid for any pricing logic.",
+        TechYugaMode.ProjectProposal => "You are the TechYuga Proposal Architect. Draft formal project scopes and timelines.",
+        TechYugaMode.JobParser => @"You are the TechYuga Job Parser. 
+When the user provides a job description (text or PDF), you MUST call 
+ParseJobDescription tool immediately. Then extract and present:
+- 🏢 Company Name
+- 💼 Job Title
+- 🛠️ Required Skills
+- 📅 Experience Required
+- 💰 Salary (if mentioned)
+- 📋 Responsibilities
+- 🎓 Qualifications
+- 🌟 Nice to Have Skills
+Format the output cleanly with headings for every JD regardless of industry.",
+        _ => "You are TechYugaAI, a professional assistant using RAG to answer questions."
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        agentTools = new TechYugaAgentTools(JobSearch);
         InitializeTools();
         messages.Add(new(ChatRole.System, GetSystemPrompt()));
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+            chatSessions = await ChatHistory.GetSessionsAsync(currentUserId);
+
+            // Get name from database
+            var appUser = await UserManager.FindByIdAsync(currentUserId);
+            if (appUser != null && !string.IsNullOrEmpty(appUser.FullName))
+                currentUserName = appUser.FullName.Split(' ')[0];
+            else
+                currentUserName = appUser?.Email?.Split('@')[0] ?? "User";
+        }
     }
 
     private void InitializeTools()
@@ -66,13 +246,135 @@
             AIFunctionFactory.Create(LoadDocumentsAsync),
             AIFunctionFactory.Create(SearchAsync),
             AIFunctionFactory.Create(agentTools.GenerateCVDoc),
-            AIFunctionFactory.Create(agentTools.CalculateBid)
+            AIFunctionFactory.Create(agentTools.CalculateBid),
+            AIFunctionFactory.Create(agentTools.ParseJobDescription),
+            AIFunctionFactory.Create(agentTools.SearchJobsAsync)
         ];
+    }
+
+    private async Task HandleNewChat()
+    {
+        sidebarOpen = false;
+        currentSessionId = 0;
+        await ResetConversationAsync();
+    }
+
+    private async Task LoadSessionAsync(int sessionId)
+    {
+        sidebarOpen = false;
+        currentSessionId = sessionId;
+
+        // Restore mode from session
+        var session = chatSessions.FirstOrDefault(s => s.Id == sessionId);
+        if (session != null && Enum.TryParse<TechYugaMode>(session.Mode, out var restoredMode))
+        {
+            currentMode = restoredMode;
+
+            // Restore job search toggle if needed
+            if (session.Mode == "JobParser")
+            {
+                // Check if messages contain job search context
+                var dbMsgsCheck = await ChatHistory.GetMessagesAsync(sessionId);
+                var hasJobSearch = dbMsgsCheck.Any(m => m.Content.Contains("jobcards") || m.Content.Contains("TITLE:"));
+                showJobSearch = hasJobSearch;
+            }
+        }
+
+        var dbMessages = await ChatHistory.GetMessagesAsync(sessionId);
+        messages.Clear();
+
+        // Set correct system prompt based on restored mode
+        if (showJobSearch)
+            messages.Add(new(ChatRole.System, @"You are TechYuga Job Search Assistant. 
+When user asks for jobs, MUST call SearchJobsAsync tool immediately.
+IMPORTANT: Return the EXACT raw output from SearchJobsAsync tool WITHOUT any modifications.
+Do NOT convert to markdown. Do NOT add bullet points. Do NOT reformat.
+Just return the raw tool output exactly as received."));
+        else
+            messages.Add(new(ChatRole.System, GetSystemPrompt()));
+
+        foreach (var msg in dbMessages)
+        {
+            var role = msg.Role == "User" ? ChatRole.User : ChatRole.Assistant;
+            messages.Add(new ChatMessage(role, msg.Content));
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task DeleteSessionAsync(int sessionId)
+    {
+        await ChatHistory.DeleteSessionAsync(sessionId);
+        chatSessions = await ChatHistory.GetSessionsAsync(currentUserId);
+
+        if (currentSessionId == sessionId)
+        {
+            currentSessionId = 0;
+            await ResetConversationAsync();
+        }
+        StateHasChanged();
+    }
+
+    private void ToggleJobSearch()
+    {
+        showJobSearch = !showJobSearch;
+        messages.Clear();
+        if (showJobSearch)
+            messages.Add(new(ChatRole.System, @"You are TechYuga Job Search Assistant. 
+When user asks for jobs, MUST call SearchJobsAsync tool immediately.
+IMPORTANT: Return the EXACT raw output from SearchJobsAsync tool WITHOUT any modifications.
+Do NOT convert to markdown. Do NOT add bullet points. Do NOT reformat.
+Just return the raw tool output exactly as received."));
+        else
+            messages.Add(new(ChatRole.System, GetSystemPrompt()));
+    }
+
+    private async Task HandlePdfUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (!file.Name.EndsWith(".pdf"))
+        {
+            uploadStatus = "❌ Only PDF files allowed.";
+            return;
+        }
+        uploadStatus = "⏳ Reading PDF...";
+        StateHasChanged();
+        try
+        {
+            await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var extractedText = await FileParser.ExtractFromPdfAsync(stream);
+            if (string.IsNullOrWhiteSpace(extractedText))
+            {
+                uploadStatus = "❌ Could not extract text from PDF.";
+                return;
+            }
+            uploadStatus = $"✅ {file.Name} loaded!";
+            await AddUserMessageAsync(new ChatMessage(ChatRole.User,
+                $"Please parse this job description from PDF:\n\n{extractedText}"));
+        }
+        catch (Exception ex)
+        {
+            uploadStatus = $"❌ Error: {ex.Message}";
+        }
     }
 
     private async Task SwitchMode(TechYugaMode newMode)
     {
+        // Job Parser requires login
+        if (newMode == TechYugaMode.JobParser && !IsAuthenticated)
+        {
+            showLoginModal = true;
+            modalTab = "login";
+            return;
+        }
+
+        // Close modal if open
+        showLoginModal = false;
+
         currentMode = newMode;
+        uploadStatus = "";
+        showJobSearch = false;
+        currentSessionId = 0;
         await ResetConversationAsync();
     }
 
@@ -80,6 +382,26 @@
     {
         CancelAnyCurrentResponse();
         messages.Add(userMessage);
+
+        // Create session on first message
+        if (currentSessionId == 0 && !string.IsNullOrEmpty(currentUserId))
+        {
+            var newSession = await ChatHistory.CreateSessionAsync(currentUserId, currentMode.ToString());
+            currentSessionId = newSession.Id;
+            chatSessions = await ChatHistory.GetSessionsAsync(currentUserId);
+        }
+
+        // Save user message to DB
+        if (currentSessionId > 0)
+        {
+            await ChatHistory.SaveMessageAsync(currentSessionId, "User", userMessage.Text ?? "");
+
+            // Auto title from first message
+            var existingSession = chatSessions.FirstOrDefault(s => s.Id == currentSessionId);
+            if (existingSession != null && existingSession.Title == "New Chat")
+                await ChatHistory.UpdateTitleFromMessageAsync(currentSessionId, userMessage.Text ?? "New Chat");
+        }
+
         chatSuggestions?.Clear();
         await chatInput!.FocusAsync();
 
@@ -97,6 +419,14 @@
 
         messages.Add(currentResponseMessage!);
         statefulMessageCount = chatOptions.ConversationId is not null ? messages.Count : 0;
+
+        // Save AI response to DB
+        if (currentSessionId > 0)
+            await ChatHistory.SaveMessageAsync(currentSessionId, "Assistant", responseText.Text ?? "");
+
+        // Refresh sidebar with updated titles
+        chatSessions = await ChatHistory.GetSessionsAsync(currentUserId);
+
         currentResponseMessage = null;
         chatSuggestions?.Update(messages);
     }

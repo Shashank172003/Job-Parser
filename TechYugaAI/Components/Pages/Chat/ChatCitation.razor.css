@@ -1,37 +1,50 @@
-﻿.citation {
+﻿/* ── CITATION CARD ── */
+.citation {
     display: inline-flex;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    padding: 0.5rem 0.75rem;
     margin-top: 1rem;
     margin-right: 1rem;
-    border-bottom: 2px solid #a770de;
+    border-bottom: 2px solid #6366f1;
     gap: 0.5rem;
-    border-radius: 0.25rem;
+    border-radius: 8px;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    background-color: #ffffff;
+    background-color: #1e2435;
+    border: 1px solid #2a3148;
+    border-bottom: 2px solid #6366f1;
+    color: #e2e8f0;
+    transition: all 0.2s;
+    text-decoration: none;
 }
 
     .citation[href]:hover {
-        outline: 1px solid #865cb1;
+        outline: none;
+        border-color: #6366f1;
+        background-color: rgba(99,102,241,0.12);
+        box-shadow: 0 0 12px rgba(99,102,241,0.2);
     }
 
     .citation svg {
         width: 1.5rem;
         height: 1.5rem;
+        color: #6366f1;
+        flex-shrink: 0;
     }
 
     .citation:active {
-        background-color: rgba(0,0,0,0.05);
+        background-color: rgba(99,102,241,0.18);
     }
 
+/* ── CITATION CONTENT ── */
 .citation-content {
     display: flex;
     flex-direction: column;
+    gap: 2px;
 }
 
 .citation-file {
     font-weight: 600;
+    color: #f1f5f9;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.82rem;
 }

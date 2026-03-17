@@ -1,0 +1,212 @@
+﻿/* ── AUTH CONTAINER ── */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    padding: 20px;
+}
+
+/* ── AUTH CARD ── */
+.auth-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* ── LOGO ── */
+.auth-logo {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: #0f172a;
+    text-align: center;
+}
+
+    .auth-logo span {
+        color: #6366f1;
+    }
+
+/* ── TITLE ── */
+.auth-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #0f172a;
+    text-align: center;
+    margin: 0;
+}
+
+/* ── SUBTITLE ── */
+.auth-subtitle {
+    color: #475569;
+    font-size: 0.88rem;
+    text-align: center;
+    margin: -10px 0 0;
+}
+
+/* ── ERROR / SUCCESS ── */
+.auth-error {
+    background: rgba(220,38,38,0.08);
+    border: 1px solid #fca5a5;
+    color: #dc2626;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.auth-success {
+    background: rgba(22,163,74,0.08);
+    border: 1px solid #86efac;
+    color: #16a34a;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* ── FORM ── */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+    .form-group label {
+        font-size: 0.82rem;
+        color: #475569;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 500;
+    }
+
+/* ── INPUT ── */
+.form-input {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #0f172a;
+    font-size: 0.9rem;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+    .form-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        background: #ffffff;
+    }
+
+    .form-input::placeholder {
+        color: #94a3b8;
+    }
+
+/* ── BUTTONS ── */
+.auth-btn {
+    background: linear-gradient(135deg, #6366f1, #4338ca);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: opacity 0.2s, transform 0.2s;
+    width: 100%;
+}
+
+    .auth-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+/* ── DIVIDER ── */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.82rem;
+}
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+
+    .auth-divider span {
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+/* ── GOOGLE BUTTON ── */
+.auth-btn-google {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'Outfit', sans-serif;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+    .auth-btn-google:hover {
+        background: #f1f5f9;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+/* ── SWITCH LINK ── */
+.auth-switch {
+    text-align: center;
+    color: #475569;
+    font-size: 0.83rem;
+    margin: 0;
+}
+
+    .auth-switch a {
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 24px 18px;
+    }
+
+    .auth-title {
+        font-size: 1.1rem;
+    }
+}

@@ -1,3 +1,4 @@
+/* ── SUGGESTIONS ROW ── */
 .suggestions {
     text-align: right;
     white-space: nowrap;
@@ -7,3 +8,29 @@
     display: flex;
     margin-bottom: 0.75rem;
 }
+
+    /* ── SUGGESTION CHIPS ── */
+    .suggestions button {
+        background: #1e2435;
+        border: 1px solid #2a3148;
+        color: #94a3b8;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.78rem;
+        font-weight: 500;
+        padding: 5px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+        .suggestions button:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: rgba(59,130,246,0.1);
+            box-shadow: 0 0 10px rgba(59,130,246,0.15);
+        }
+
+        .suggestions button:active {
+            transform: scale(0.97);
+        }
